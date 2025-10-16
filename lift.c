@@ -1,4 +1,3 @@
-#include <stdio.h>
 #include <stdbool.h>
 
 #include <pico/stdlib.h>
@@ -18,9 +17,6 @@
 #define BTN3 18
 
 #define ALRM_BTN 17
-
-#define BTN_PRESSED(btn) \
-    (!gpio_get(btn))
 
 #define BTN_TO_FLOOR(btn) \
     ( btn == BTN1 ? 0 \
@@ -89,9 +85,12 @@ void alarm_stop() {
 }
 
 void set_target_floor(uint floor) {
+    int previous_dir = sign(target_floor - current_floor);
     target_floor = floor;
     alarm_stop();
-    move_timer = delayed_by_ms(get_absolute_time(), MOVE_DELAY);
+    int dir = sign(target_floor - current_floor);
+    if(previous_dir != dir)
+        move_timer = delayed_by_ms(get_absolute_time(), MOVE_DELAY);
 }
 
 void stop_lift() {
