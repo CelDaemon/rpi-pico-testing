@@ -3,6 +3,8 @@
 #include <pico/stdlib.h>
 #include <hardware/gpio.h>
 
+#define BIT(x) (1u << (x))
+
 #define MOVE_DELAY 2000
 #define ALRM_DELAY 100
 
@@ -30,12 +32,10 @@
       : floor == 2 ? LED3 \
       : 0 )
 
-
 bool btn1_state = false;
 bool btn2_state = false;
 bool btn3_state = false;
 bool alrm_btn_state = false;
-
 
 bool is_alarming = false;
 
@@ -93,13 +93,11 @@ void set_target_floor(uint floor) {
         move_timer = delayed_by_ms(get_absolute_time(), MOVE_DELAY);
 }
 
-void stop_lift() {
+void lift_stop() {
     target_floor = current_floor;
 }
 
-
-
-void move_lift() {
+void lift_move() {
     int dir = sign(target_floor - current_floor);
     if(dir == 0)
         return;
@@ -111,32 +109,37 @@ void move_lift() {
     move_timer = delayed_by_ms(current_time, MOVE_DELAY);
 }
 
-
 int main() {
-     gpio_init(LED1);
-     gpio_set_dir(LED1, GPIO_OUT);
-     gpio_init(LED2);
-     gpio_set_dir(LED2, GPIO_OUT);
-     gpio_init(LED3);
-     gpio_set_dir(LED3, GPIO_OUT);
+    gpio_init_mask(
+        BIT(LED1)     |
+        BIT(LED2)     |
+        BIT(LED3)     |
+        BIT(BUZ)      |
+        BIT(BTN1)     |
+        BIT(BTN2)     |
+        BIT(BTN3)     |
+        BIT(ALRM_BTN)
+    );
 
+    gpio_set_dir_out_masked(
+        BIT(LED1) |
+        BIT(LED2) |
+        BIT(LED3) |
+        BIT(BUZ)
+    );
 
-     gpio_init(BUZ);
-     gpio_set_dir(BUZ, GPIO_OUT);
+    gpio_set_dir_in_masked(
+        BIT(BTN1)     |
+        BIT(BTN2)     |
+        BIT(BTN3)     |
+        BIT(ALRM_BTN)
+    );
 
-
-     gpio_init(BTN1);
-     gpio_set_dir(BTN1, GPIO_IN);
      gpio_pull_up(BTN1);
-     gpio_init(BTN2);
-     gpio_set_dir(BTN2, GPIO_IN);
      gpio_pull_up(BTN2);
-     gpio_init(BTN3);
-     gpio_set_dir(BTN3, GPIO_IN);
      gpio_pull_up(BTN3);
-     gpio_init(ALRM_BTN);
-     gpio_set_dir(ALRM_BTN, GPIO_IN);
      gpio_pull_up(ALRM_BTN);
+
      update_leds();
      while(true) {
          if(btn_pressed(ALRM_BTN, &alrm_btn_state)) {
@@ -150,6 +153,6 @@ int main() {
              set_target_floor(BTN_TO_FLOOR(BTN3));
          }
          alarm_run();
-         move_lift();
+         lift_move();
      }
 }
