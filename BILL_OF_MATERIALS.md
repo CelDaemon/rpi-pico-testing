@@ -1,0 +1,14 @@
+- 2 female to male blue jumper wire
+- 2 female to male red jumper wire
+- 8 male to male blue jumper wire
+- 4 female to male yellow jumper wire
+- 5 female to male orange jumper wire
+
+- 1 piezo speaker
+- 1 ~220 Ω resistor
+- 3 Red LEDs
+- 4 Breadboard pushbuttons
+- 1 RPI Pico
+- 1 RPI Pico breakout board
+- 1 830 point breadboard
+- 1 USB cable
