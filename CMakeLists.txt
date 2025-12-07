@@ -1,12 +1,12 @@
 cmake_minimum_required(VERSION 3.27)
 
-set(PCIO_BOARD pico_w)
+#set(PICO_BOARD pico2_w)
 
 include(external/pico-sdk/pico_sdk_init.cmake)
 
 project(pico_test)
 
-option(FLASH_TARGET "Which target to flash")
+set(FLASH_TARGET "" CACHE STRING "Which target to flash")
 
 set(CMAKE_C_STANDARD 17)
 set(CMAKE_C_STANDARD_REQUIRED ON)
@@ -30,9 +30,14 @@ pico_enable_stdio_usb(light 1)
 add_executable(volume volume.c)
 target_link_libraries(volume pico_stdlib hardware_adc)
 pico_add_extra_outputs(volume)
+if(PICO_CYW43_SUPPORTED)
+    add_subdirectory(networking)
+endif()
 
-add_custom_target(flash USES_TERMINAL DEPENDS ${FLASH_TARGET}
-    COMMAND sudo mount /dev/sdb1 /mnt/rpi
-    COMMAND sudo cp "$<TARGET_FILE_DIR:${FLASH_TARGET}>/$<TARGET_FILE_BASE_NAME:${FLASH_TARGET}>.uf2" /mnt/rpi
-    COMMAND sudo umount /dev/sdb1
-)
+if(FLASH_TARGET)
+    add_custom_target(flash USES_TERMINAL DEPENDS ${FLASH_TARGET}
+        COMMAND sudo mount /dev/sda1 /mnt/rpi
+        COMMAND sudo cp "$<TARGET_FILE_DIR:${FLASH_TARGET}>/$<TARGET_FILE_BASE_NAME:${FLASH_TARGET}>.uf2" /mnt/rpi
+        COMMAND sudo umount /dev/sda1
+    )
+endif()
